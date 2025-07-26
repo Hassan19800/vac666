@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حساب الإجازات الإعتيادية لموظف</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: red;
+            text-align: center;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container label {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .form-container input, .form-container select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center; /* محاذاة النتائج في الوسط */
+        }
+        .results h2 {
+            color: #333;
+            font-size: 24px;
+        }
+        .results p {
+            font-size: 22px;
+            margin: 10px 0;
+        }
+        #vacationDays {
+            color: red;
+            font-size: 30px;
+            font-weight: bold;
+        }
+        /* إضافة التنسيق للعنوان والنص */
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header-section img {
+            width: 100px; /* حجم الصورة */
+            height: auto;
+        }
+        .header-section h2 {
+            font-size: 30px;
+            color: red;
+        }
+        .header-section p {
+            font-size: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- قسم العنوان والصورة -->
+    <div class="header-section">
+       <img src="90.png" alt="Logo">
+        <h2>نافذة أبو الحسن لحساب الإجازات الإعتيادية</h2>
+        <p>هدية من قناة Hassan Abo Elhassan على اليوتيوب</p>
+    </div>
+
+    <h1>حساب الإجازات الإعتيادية لموظف</h1>
+    <div class="form-container">
+        <label for="birthdate">تاريخ الميلاد:</label>
+        <input type="date" id="birthdate" required>
+        
+        <label for="startWorkDate">تاريخ استلام العمل:</label>
+        <input type="date" id="startWorkDate" required>
+        
+        <label for="hypotheticalHireDate">تاريخ التعيين الفرضي:</label>
+        <input type="date" id="hypotheticalHireDate">
+        
+        <label for="is5percent">هل أنت معين بنظام 5%:</label>
+        <select id="is5percent" required>
+            <option value="">اختر الإجابة</option>
+            <option value="نعم">نعم</option>
+            <option value="لا">لا</option>
+        </select>
+        
+        <button onclick="calculateResults()">إحسب الإجازات</button>
+    </div>
+
+    <div id="results" class="results" style="display: none;">
+        <h2>نتائج الحساب:</h2>
+        <p id="employeeAge"></p>
+        <p id="serviceDuration"></p>
+        <p id="vacationDays"></p>
+    </div>
+
+    <script>
+        function calculateResults() {
+            const birthdate = new Date(document.getElementById('birthdate').value);
+            const startWorkDate = new Date(document.getElementById('startWorkDate').value);
+            const hypotheticalHireDate = document.getElementById('hypotheticalHireDate').value ? new Date(document.getElementById('hypotheticalHireDate').value) : startWorkDate;
+            const is5percent = document.getElementById('is5percent').value;
+
+            if (!birthdate || !startWorkDate || !is5percent) {
+                alert('من فضلك، أكمل جميع الحقول الإلزامية.');
+                return;
+            }
+
+            const today = new Date();
+            const age = calculateAge(birthdate, today);
+            const serviceDuration = calculateServiceDuration(hypotheticalHireDate, today);
+            const vacationDays = calculateVacationDays(age, serviceDuration, is5percent);
+
+            // عرض النتائج
+            document.getElementById('employeeAge').innerText = `السن اليوم: ${age.years} سنة، ${age.months} شهر، ${age.days} يوم`;
+            document.getElementById('serviceDuration').innerText = `مدة الخدمة: ${serviceDuration.years} سنة، ${serviceDuration.months} شهر، ${serviceDuration.days} يوم`;
+            document.getElementById('vacationDays').innerText = `عدد الإجازات المسموح بها: ${vacationDays} يوم`;
+
+            // إظهار قسم النتائج
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function calculateAge(birthdate, today) {
+            let years = today.getFullYear() - birthdate.getFullYear();
+            let months = today.getMonth() - birthdate.getMonth();
+            let days = today.getDate() - birthdate.getDate();
+
+            if (days < 0) {
+                months--;
+                days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); // حساب الأيام في الشهر السابق
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            return { years, months, days };
+        }
+
+        function calculateServiceDuration(hypotheticalHireDate, today) {
+            let years = today.getFullYear() - hypotheticalHireDate.getFullYear();
+            let months = today.getMonth() - hypotheticalHireDate.getMonth();
+            let days = today.getDate() - hypotheticalHireDate.getDate();
+
+            if (days < 0) {
+                months--;
+                days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); // حساب الأيام في الشهر السابق
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            return { years, months, days };
+        }
+
+        function calculateVacationDays(age, serviceDuration, is5percent) {
+            if (is5percent === 'نعم') return 45;
+
+            if (age.years >= 50) return 45;
+
+            if (serviceDuration.years < 0.5) return 0;
+
+            if (serviceDuration.years >= 0.5 && serviceDuration.years < 1) return 21;
+            
+            if (serviceDuration.years >= 1 && serviceDuration.years <= 10) return 21;
+
+            if (serviceDuration.years > 10) return 30;
+
+            return 0;
+        }
+    </script>
+</body>
+</html>
